@@ -34,48 +34,21 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         mResultsList = (RecyclerView) findViewById(R.id.results_list);
+        TextView searchField = (TextView) findViewById(R.id.search_field);
+
         mResultsList.setHasFixedSize(true);//TODO try without
+        mResultsList.addItemDecoration(new SpacerVerticalItemDecoration(getResources().getDimensionPixelSize(R.dimen.list_vertical_spacing)));
+        mResultsList.setAdapter(new SearchResultListAdapter(getApplicationContext()));
         LinearLayoutManager llm = new LinearLayoutManager(this);
         llm.setOrientation(LinearLayoutManager.VERTICAL);
         mResultsList.setLayoutManager(llm);
-        mResultsList.setAdapter(new SearchResultListAdapter(getApplicationContext()));
-        mResultsList.addItemDecoration(new SpacerVerticalItemDecoration(getResources().getDimensionPixelSize(R.dimen.list_vertical_spacing)));
 
-        final SpotifyService spotifyService = new SpotifyApi().getService();
 
-        TextView searchField = (TextView) findViewById(R.id.search_field);
         searchField.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int actionId, KeyEvent event) {
                 String searchedString = textView.getText().toString();
-                spotifyService.searchArtists(searchedString, new Callback<ArtistsPager>() {
-                            @Override
-                            public void success(final ArtistsPager artistsPager, Response response) {
-
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mResultsList.setAdapter(new SearchResultListAdapter(getApplicationContext(), artistsPager.artists.items));
-                                        if (artistsPager.artists.total < 1) {
-                                            Toast.makeText(getApplicationContext(), "No artists found.", Toast.LENGTH_SHORT).show();
-                                        }
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void failure(final RetrofitError error) {
-                                Log.d(TAG, error.toString());
-                                runOnUiThread(new Runnable() {
-                                  @Override
-                                  public void run() {
-
-                                      Toast.makeText(getApplicationContext(), "Error when searching.\nHTTP status code " + error.getResponse().getStatus(), Toast.LENGTH_SHORT).show();
-                                  }
-                              });
-                            }
-                        }
-                );
+                searchForArtistsAndDisplayResults( searchedString );
                 return true;
             }
         });
@@ -84,7 +57,7 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate( R.menu.menu_main, menu );
         return true;
     }
 
@@ -106,9 +79,43 @@ public class MainActivity extends ActionBarActivity {
     private void updateSearchResultsAdapter(List<Artist> artists) {
     }
 
-    private class SearchFieldOnEditorActionListener implements TextView.OnEditorActionListener {
-        private final String TAG = getClass().getName();
+    private void searchForArtistsAndDisplayResults(String searchString){
 
+        final SpotifyService spotifyService = new SpotifyApi().getService();
+
+        spotifyService.searchArtists(searchString, new Callback<ArtistsPager>() {
+                    @Override
+                    public void success(final ArtistsPager artistsPager, Response response) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mResultsList.setAdapter(new SearchResultListAdapter(getApplicationContext(), artistsPager.artists.items));
+                                if (artistsPager.artists.total < 1) {
+                                    Toast.makeText(getApplicationContext(), "No artists found.", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void failure(final RetrofitError error) {
+                        Log.d(TAG, error.toString());
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                Toast.makeText(getApplicationContext(), "Error when searching.\nHTTP status code " + error.getResponse().getStatus(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                }
+        );
+    }
+
+    private class SearchFieldOnEditorActionListener implements TextView.OnEditorActionListener {
+
+        private final String TAG = getClass().getName();
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             String searchedString = v.getText().toString();
@@ -117,5 +124,6 @@ public class MainActivity extends ActionBarActivity {
 
             return true;
         }
+
     }
 }
