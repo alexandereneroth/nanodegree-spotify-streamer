@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">SpotifyStreamer</string>
+    <string name="app_name">Spotify Streamer</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="description_thumbnail">A thumbnail image</string>
+    <string name="search_field_hint">Search for an artist</string>
 </resources>

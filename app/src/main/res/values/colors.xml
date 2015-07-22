@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="bright" type="color">#FFE0B2</item>
+    <item name="neutral" type="color">#FFEF6C00</item>
+    <item name="dark" type="color">#FFE65100</item>
+    <item name="accent" type="color">#FFB2FF59</item>
+</resources>
